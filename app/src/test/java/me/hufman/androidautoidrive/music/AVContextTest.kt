@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import org.mockito.kotlin.*
 import de.bmw.idrive.BMWRemoting
 import de.bmw.idrive.BMWRemotingClient
+import me.hufman.androidautoidrive.MockAppSettings
 import me.hufman.androidautoidrive.MockBMWRemotingServer
 import me.hufman.androidautoidrive.PhoneAppResources
 import me.hufman.androidautoidrive.carapp.ConcreteAMAppInfo
@@ -60,6 +61,7 @@ class AVContextTest {
 		on { getPlaybackPosition() } doReturn PlaybackPosition(false, false, 0, 5000L, 180000L)
 		on { isSupportedAction(any()) } doReturn true
 		on { isSupportedAction(MusicAction.PLAY_FROM_SEARCH) } doReturn false
+		on { appSettings } doReturn MockAppSettings()
 		on { loadDesiredApp() } doReturn ""
 		on { musicSessions } doReturn mock<MusicSessions>()
 		on { isConnected() } doReturn true

@@ -3012,6 +3012,7 @@ class MusicAppTest {
 
 		// a new music session that we know can browse opens up
 		reset(musicController)
+		whenever(musicController.appSettings) doReturn MockAppSettings()
 		whenever(musicController.musicSessions) doAnswer {
 			mock<MusicSessions> {
 				on { getPlayingApp() } doReturn nowPlayingApp
