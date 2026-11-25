@@ -18,6 +18,8 @@ class MusicAdvancedSettingsModel(appContext: Context): ViewModel() {
 	val showAdvanced = BooleanLiveSetting(appContext, AppSettings.KEYS.SHOW_ADVANCED_SETTINGS)
 	val connectionProbeIps = StringLiveSetting(appContext, AppSettings.KEYS.CONNECTION_PROBE_IPS)
 	val audioContext = BooleanLiveSetting(appContext, AppSettings.KEYS.AUDIO_FORCE_CONTEXT)
+	val autoplayOnConnect = BooleanLiveSetting(appContext, AppSettings.KEYS.AUDIO_AUTOPLAY_ON_CONNECT)
+	val autoReconnect = BooleanLiveSetting(appContext, AppSettings.KEYS.AUDIO_AUTO_RECONNECT)
 	val spotifyLayout = BooleanLiveSetting(appContext, AppSettings.KEYS.FORCE_SPOTIFY_LAYOUT)
 	val audioplayerLayout = BooleanLiveSetting(appContext, AppSettings.KEYS.FORCE_AUDIOPLAYER_LAYOUT)
 }

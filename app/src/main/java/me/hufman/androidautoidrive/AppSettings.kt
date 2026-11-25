@@ -56,6 +56,8 @@ interface AppSettings {
 		AUDIO_SUPPORTS_USB("Audio_Supports_USB", (Build.VERSION.SDK_INT < Build.VERSION_CODES.O).toString(), "The phone is old enough to support USB accessory audio"),
 		AUDIO_FORCE_CONTEXT("Audio_Force_Context", "false", "Force audio context"),
 		AUDIO_DESIRED_APP("Audio_Desired_App", "", "Last music app that was playing"),
+		AUDIO_AUTOPLAY_ON_CONNECT("Audio_Autoplay_On_Connect", "false", "Switch the car to the last music app and resume playback when the car connects"),
+		AUDIO_AUTO_RECONNECT("Audio_Auto_Reconnect", "true", "Periodically reconnect to the last music app if its connection drops"),
 		SHOW_ADVANCED_SETTINGS("Advanced_Settings", "false", "Show advanced settings"),
 		HIDDEN_MUSIC_APPS("Hidden_Music_Apps", "com.android.bluetooth,com.clearchannel.iheartradio.connect,com.google.android.googlequicksearchbox,com.google.android.youtube,com.vanced.android.youtube", "List of music apps to hide from the app list"),
 		FORCE_SPOTIFY_LAYOUT("Force_Spotify_Layout", "false", "Use Spotify UI Resources"),

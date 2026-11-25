@@ -13,6 +13,7 @@ import io.bimmergestalt.idriveconnectkit.android.IDriveConnectionStatus
 import io.bimmergestalt.idriveconnectkit.android.security.SecurityAccess
 import io.bimmergestalt.idriveconnectkit.rhmi.*
 import io.bimmergestalt.idriveconnectkit.rhmi.deserialization.loadFromXML
+import me.hufman.androidautoidrive.AppSettings
 import me.hufman.androidautoidrive.BuildConfig
 import me.hufman.androidautoidrive.PhoneAppResources
 import me.hufman.androidautoidrive.carapp.*
@@ -42,6 +43,7 @@ class MusicApp(val iDriveConnectionStatus: IDriveConnectionStatus, val securityA
 	val avContext: AVContextHandler
 	val amAppList: AMAppList<MusicAppInfo>
 	val contextTracker = ContextTracker()
+	var autoplayTriggered = false   // only autoplay once per car connection
 
 	val globalMetadata: GlobalMetadata
 	val playbackId5View: PlaybackView?
@@ -143,6 +145,9 @@ class MusicApp(val iDriveConnectionStatus: IDriveConnectionStatus, val securityA
 				}
 			}
 
+			// optionally take over the car's audio source and resume the last app
+			maybeAutoplay()
+
 			// update the AM apps list
 			updateAmApps()
 
@@ -156,6 +161,28 @@ class MusicApp(val iDriveConnectionStatus: IDriveConnectionStatus, val securityA
 		musicController.listener = Runnable {
 			redraw()
 		}
+		// retry the autoplay later, in case the car wasn't ready during discovery
+		musicController.watchdogListener = Runnable {
+			maybeAutoplay()
+		}
+	}
+
+	/**
+	 * If enabled in the settings, ask the car to switch its audio source to us
+	 * and resume the last music app, once per car connection
+	 */
+	fun maybeAutoplay() {
+		if (autoplayTriggered) return
+		if (musicController.appSettings[AppSettings.KEYS.AUDIO_AUTOPLAY_ON_CONNECT] != "true") return
+		val appInfo = musicController.currentAppInfo ?: return
+		if (musicAppMode.shouldRequestAudioContext() && avContext.avHandle == null) {
+			// the car isn't ready for an audio context yet, try again later
+			avContext.createAvHandle()
+			if (avContext.avHandle == null) return
+		}
+		autoplayTriggered = true
+		Log.i(TAG, "Autoplay: requesting the audio context for ${appInfo.name}")
+		avContext.av_requestContext(appInfo)
 	}
 
 	private fun createRhmiApp(): RHMIApplication {

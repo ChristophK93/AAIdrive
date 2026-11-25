@@ -32,6 +32,9 @@ class MusicController(val context: Context, val handler: Handler): CoroutineScop
 
 		// disable autoswitch for a time after the user picks an app manually
 		private const val DISABLE_AUTOSWITCH_TIMEOUT = 5000
+
+		// how often to check that the desired music app is still connected
+		private const val WATCHDOG_INTERVAL = 15000L
 	}
 
 	val musicSessions = MusicSessions(context)
@@ -52,6 +55,11 @@ class MusicController(val context: Context, val handler: Handler): CoroutineScop
 	var desiredPlayback = false  // if we should start playback as soon as connected
 	var triggeredPlayback = false   // whether we have triggered playback on a fresh connection
 	var triggeredAttempts = 0     // only try to trigger playback a certain number of times
+
+	// periodically reconnects the desired app if its connection dropped
+	var watchdogActive = false
+	var watchdogListener: Runnable? = null   // extra work to do on each watchdog tick
+	private val watchdogTask = Runnable { runWatchdog() }
 
 	// handles manual rewinding/fastforwarding
 	val seekingController = SeekingController(context, handler, this)
@@ -389,6 +397,36 @@ class MusicController(val context: Context, val handler: Handler): CoroutineScop
 				disconnectApp(false)
 				connectApp(appInfo)
 			}
+		}
+	}
+
+	/** Start periodically checking that the desired music app stays connected */
+	fun startWatchdog() {
+		if (watchdogActive) return
+		watchdogActive = true
+		handler.removeCallbacks(watchdogTask)
+		handler.postDelayed(watchdogTask, WATCHDOG_INTERVAL)
+	}
+
+	fun stopWatchdog() {
+		watchdogActive = false
+		handler.removeCallbacks(watchdogTask)
+	}
+
+	private fun runWatchdog() {
+		if (!watchdogActive) return
+		try {
+			val appInfo = currentAppInfo
+			if (appSettings[AppSettings.KEYS.AUDIO_AUTO_RECONNECT] != "false" && appInfo != null && !isConnected()) {
+				Log.i(TAG, "Watchdog noticed that $appInfo is not connected, reconnecting")
+				connectAppAutomatically(appInfo)
+			}
+			watchdogListener?.run()
+		} catch (e: Exception) {
+			Log.w(TAG, "Exception in music watchdog", e)
+		}
+		if (watchdogActive) {
+			handler.postDelayed(watchdogTask, WATCHDOG_INTERVAL)
 		}
 	}
 }

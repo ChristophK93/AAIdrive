@@ -75,6 +75,7 @@ class MusicAppService: CarAppService() {
 					musicAppMode)
 		}
 		this.carappMusic = carappMusic
+		musicController.startWatchdog()
 
 		// use this app's layout for navigation
 		musicAppDiscovery.discoverApps()
@@ -92,6 +93,7 @@ class MusicAppService: CarAppService() {
 			if (carappMusic?.avContext?.currentContext == true) {
 				carappMusic?.musicController?.pauseSync()
 			}
+			carappMusic?.musicController?.stopWatchdog()
 			carappMusic?.musicController?.disconnectApp(pause = false)
 			carappMusic?.musicAppDiscovery?.cancelDiscovery()
 		} catch (e: Exception) {

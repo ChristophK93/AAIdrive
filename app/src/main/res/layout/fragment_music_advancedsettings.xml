@@ -35,6 +35,24 @@
             android:layout_marginBottom="@dimen/settings_vertical_margin" />
 
         <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swAutoplayOnConnect"
+            android:checked="@={settings.autoplayOnConnect}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/enable_autoplay_on_connect"
+            android:layout_marginBottom="@dimen/settings_vertical_margin" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swAutoReconnect"
+            android:checked="@={settings.autoReconnect}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/enable_auto_reconnect"
+            android:layout_marginBottom="@dimen/settings_vertical_margin" />
+
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/swSpotifyLayout"
             android:checked="@={settings.spotifyLayout}"
             android:layout_width="match_parent"

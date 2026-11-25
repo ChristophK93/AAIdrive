@@ -1,0 +1,54 @@
+name: personal-apk
+
+# Builds a signed APK of this fork for personal installation.
+# Required repository secrets:
+#   KEYSTORE_BASE64          base64 of the signing keystore (keep it stable, or updates won't install)
+#   KEYSTORE_PASSWORD        keystore password
+#   KEYSTORE_ALIAS_PASSWORD  key password for the "upload" alias
+#   ANDROIDAUTOIDRIVE_SPOTIFYAPIKEY  Client ID from developer.spotify.com
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['personal']
+
+env:
+  KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+  KEYSTORE_ALIAS: upload
+  KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
+  AndroidAutoIdrive_SpotifyApiKey: ${{ secrets.ANDROIDAUTOIDRIVE_SPOTIFYAPIKEY }}
+
+jobs:
+  apk:
+    if: github.repository != 'BimmerGestalt/AAIdrive'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+      - name: Prepare cached external dependencies
+        uses: actions/cache@v4
+        with:
+          key: aaidrive_external_${{ hashFiles('.github/actions/download-externals-action/download.sh') }}
+          path: |
+            external
+      - name: Download build dependencies
+        uses: ./.github/actions/download-externals-action
+      - name: Extract signing key
+        run: "echo '${{ secrets.KEYSTORE_BASE64 }}' | base64 -d > keystore.jks"
+      - name: Run music unit tests
+        run: ./gradlew testNomapNonalyticsFullDebugUnitTest --tests 'me.hufman.androidautoidrive.music.*' --stacktrace
+      - name: Build the APK
+        run: ./gradlew assembleNomapNonalyticsFullRelease --stacktrace
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: aaidrive-personal-apk
+          path: app/build/outputs/apk/**/*.apk
